@@ -1,15 +1,29 @@
+"use client";
+
 import { useState } from "react";
+
+type Result = {
+  diff: number;
+  regen: number;
+  final: number;
+};
 
 export default function StaminaCalculator() {
   const [stamina, setStamina] = useState("40:46");
   const [start, setStart] = useState("03:50");
   const [end, setEnd] = useState("10:00");
   const [state, setState] = useState("pz");
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<Result | null>(null);
 
-  const toMinutes = (time) => {
+  const toMinutes = (time: string): number => {
     const [h, m] = time.split(":").map(Number);
     return h * 60 + m;
+  };
+
+  const format = (min: number): string => {
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
   };
 
   const calculate = () => {
@@ -20,9 +34,9 @@ export default function StaminaCalculator() {
     if (endMin < startMin) endMin += 1440;
 
     const diff = endMin - startMin;
-    const isGreen = staminaMin >= 2340; // 39h
+    const isGreen = staminaMin >= 2340; // 39:00+
 
-    let rate;
+    let rate: number;
     if (isGreen) {
       rate = state === "pz" ? 5 : 6;
     } else {
@@ -39,53 +53,76 @@ export default function StaminaCalculator() {
     });
   };
 
-  const format = (min) => {
-    const h = Math.floor(min / 60);
-    const m = min % 60;
-    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-  };
-
   return (
     <div className="min-h-screen bg-neutral-900 text-white flex items-center justify-center p-4">
       <div className="bg-neutral-800 p-6 rounded-2xl shadow-xl w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Stamina Rubinot</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">
+          Stamina Rubinot
+        </h1>
 
         <div className="space-y-4">
           <div>
             <label className="text-sm">Stamina atual</label>
-            <input value={stamina} onChange={(e) => setStamina(e.target.value)} className="w-full p-2 rounded bg-neutral-700" />
+            <input
+              value={stamina}
+              onChange={(e) => setStamina(e.target.value)}
+              className="w-full p-2 rounded bg-neutral-700"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-sm">Horário atual</label>
-              <input value={start} onChange={(e) => setStart(e.target.value)} className="w-full p-2 rounded bg-neutral-700" />
+              <input
+                value={start}
+                onChange={(e) => setStart(e.target.value)}
+                className="w-full p-2 rounded bg-neutral-700"
+              />
             </div>
             <div>
               <label className="text-sm">Horário alvo</label>
-              <input value={end} onChange={(e) => setEnd(e.target.value)} className="w-full p-2 rounded bg-neutral-700" />
+              <input
+                value={end}
+                onChange={(e) => setEnd(e.target.value)}
+                className="w-full p-2 rounded bg-neutral-700"
+              />
             </div>
           </div>
 
           <div>
             <label className="text-sm">Situação</label>
-            <select value={state} onChange={(e) => setState(e.target.value)} className="w-full p-2 rounded bg-neutral-700">
+            <select
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+              className="w-full p-2 rounded bg-neutral-700"
+            >
               <option value="offline">Offline</option>
               <option value="pz">Online em PZ</option>
               <option value="trainer">Trainer</option>
             </select>
           </div>
 
-          <button onClick={calculate} className="w-full bg-green-600 hover:bg-green-700 transition p-3 rounded-xl font-bold">
+          <button
+            onClick={calculate}
+            className="w-full bg-green-600 hover:bg-green-700 transition p-3 rounded-xl font-bold"
+          >
             Calcular
           </button>
         </div>
 
         {result && (
           <div className="mt-6 bg-neutral-900 p-4 rounded-xl text-sm space-y-2">
-            <div>⏳ Tempo decorrido: {Math.floor(result.diff / 60)}h {result.diff % 60}min</div>
-            <div>🔄 Regenerado: {Math.floor(result.regen / 60)}h {result.regen % 60}min</div>
-            <div className="text-lg font-bold mt-2">✅ Stamina final: {format(result.final)}</div>
+            <div>
+              ⏳ Tempo decorrido: {Math.floor(result.diff / 60)}h{" "}
+              {result.diff % 60}min
+            </div>
+            <div>
+              🔄 Regenerado: {Math.floor(result.regen / 60)}h{" "}
+              {result.regen % 60}min
+            </div>
+            <div className="text-lg font-bold mt-2">
+              ✅ Stamina final: {format(result.final)}
+            </div>
           </div>
         )}
       </div>
